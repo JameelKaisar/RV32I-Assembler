@@ -3,10 +3,18 @@
 #include <string>
 #include <vector>
 
+#include "helper.h"
 #include "rv32i.h"
 
 class Assembler {
    private:
+    std::string encode(std::string instr) {
+        std::vector<std::string> instr_tokens = parse_instr(instr);
+        InstrParams instr_params = parse_tokens(instr_tokens);
+        std::string encoded_instr = parse_params(instr_params);
+        return encoded_instr;
+    }
+
     std::vector<std::string> parse_instr(std::string instr) {
         std::regex re(R"([\s|,]+)");
         std::sregex_token_iterator first{instr.begin(), instr.end(), re, -1}, last;
@@ -128,10 +136,11 @@ class Assembler {
     }
 
    public:
-    std::string encode(std::string instr) {
-        std::vector<std::string> instr_tokens = parse_instr(instr);
-        InstrParams instr_params = parse_tokens(instr_tokens);
-        std::string encoded_instr = parse_params(instr_params);
-        return encoded_instr;
+   std::string encode_binary(std::string instr) {
+        return encode(instr);
+    }
+
+    std::string encode_hex(std::string instr) {
+        return "0x" + bin_to_hex(encode(instr));
     }
 };
