@@ -20,6 +20,11 @@ class Assembler {
         std::sregex_token_iterator first{instr.begin(), instr.end(), re, -1}, last;
         std::vector<std::string> tokens(first, last);
         tokens.erase(remove_if(tokens.begin(), tokens.end(), [](std::string const& s) { return s.size() == 0; }), tokens.end());
+        for (int i = 0; i < tokens.size(); i++) {
+            for_each(tokens[i].begin(), tokens[i].end(), [i](char& c) {
+                c = (i == 0) ? toupper(c) : tolower(c);
+            });
+        }
         return tokens;
     }
 
@@ -136,7 +141,7 @@ class Assembler {
     }
 
    public:
-   std::string encode_binary(std::string instr) {
+    std::string encode_binary(std::string instr) {
         return encode(instr);
     }
 
