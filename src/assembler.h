@@ -84,12 +84,8 @@ class Assembler {
                 break;
             case InstrI:
                 imm_parts = parse_imm_parts(imm);
-                if (name == "SLLI") {
-                    encoded_instr = "0000000" + imm_parts.imm_4_0 + rs1 + funct3 + rd + opcode;
-                } else if (name == "SRLI") {
-                    encoded_instr = "0000000" + imm_parts.imm_4_0 + rs1 + funct3 + rd + opcode;
-                } else if (name == "SRAI") {
-                    encoded_instr = "0100000" + imm_parts.imm_4_0 + rs1 + funct3 + rd + opcode;
+                if (funct7.size() > 0) {
+                    encoded_instr = funct7 + imm_parts.imm_4_0 + rs1 + funct3 + rd + opcode;
                 } else {
                     encoded_instr = imm_parts.imm_11_0 + rs1 + funct3 + rd + opcode;
                 }
