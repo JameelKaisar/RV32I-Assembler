@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "helper.h"
-#include "rv32i.h"
+#include "./../helper/helper.h"
+#include "./../rv32i/rv32i.h"
 
 class Assembler {
    private:

@@ -1,7 +1,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "structs.h"
+#include "./../structs/structs.h"
 
 std::unordered_map<std::string, InstrInfo> instr_info = {
     {"LUI", {InstrU, "0110111", "", ""}},

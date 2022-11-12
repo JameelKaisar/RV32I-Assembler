@@ -1,6 +1,6 @@
 #include <string>
 
-#include "enums.h"
+#include "./../enums/enums.h"
 
 typedef struct InstrParams {
     std::string name;
