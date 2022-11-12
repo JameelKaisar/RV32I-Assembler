@@ -10,22 +10,88 @@ class Assembler {
    private:
     std::string encode(std::string instr) {
         std::vector<std::string> instr_tokens = parse_instr(instr);
+        if (instr_tokens.size() == 0) {
+            throw std::runtime_error("Invalid instruction");
+        }
         InstrParams instr_params = parse_tokens(instr_tokens);
         std::string encoded_instr = parse_params(instr_params);
         return encoded_instr;
     }
 
     std::vector<std::string> parse_instr(std::string instr) {
-        std::regex re(R"([\s|,]+)");
-        std::sregex_token_iterator first{instr.begin(), instr.end(), re, -1}, last;
-        std::vector<std::string> tokens(first, last);
-        tokens.erase(remove_if(tokens.begin(), tokens.end(), [](std::string const& s) { return s.size() == 0; }), tokens.end());
-        for (int i = 0; i < tokens.size(); i++) {
-            for_each(tokens[i].begin(), tokens[i].end(), [i](char& c) {
+        std::vector<std::string> instr_tokens;
+        std::regex name_regex("\\s*([[:alpha:]]+)\\s+.*");
+        std::smatch matches;
+        if (!std::regex_match(instr, matches, name_regex)) {
+            return instr_tokens;
+        }
+        std::string instr_name = matches[1];
+        for_each(instr_name.begin(), instr_name.end(), [](char& c) {
+            c = toupper(c);
+        });
+        if (instr_info.find(instr_name) == instr_info.end()) {
+            return instr_tokens;
+        }
+        InstrFormat format = instr_info[instr_name].format;
+        instr_tokens = parse_instr_format(instr, format);
+        for (int i = 0; i < instr_tokens.size(); i++) {
+            for_each(instr_tokens[i].begin(), instr_tokens[i].end(), [i](char& c) {
                 c = (i == 0) ? toupper(c) : tolower(c);
             });
+            if (i != 0 && instr_tokens[i][0] == 'x' && instr_registers.find(instr_tokens[i]) == instr_registers.end()) {
+                return std::vector<std::string>();
+            }
         }
-        return tokens;
+        return instr_tokens;
+    }
+
+    std::vector<std::string> parse_instr_format(std::string instr, InstrFormat format) {
+        std::vector<std::string> instr_tokens;
+        std::regex instr_regex;
+        std::smatch matches;
+        switch (format) {
+            case InstrR:
+                instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*([xX][0-9]+)\\s*,\\s*([xX][0-9]+)\\s*");
+                if (std::regex_match(instr, matches, instr_regex)) {
+                    instr_tokens = {matches[1], matches[2], matches[3], matches[4]};
+                }
+                break;
+            case InstrI:
+                instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*");
+                if (std::regex_match(instr, matches, instr_regex)) {
+                    instr_tokens = {matches[1], matches[2], matches[3], matches[4]};
+                }
+                instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*\\(\\s*([xX][0-9]+)\\s*\\)\\s*");
+                if (std::regex_match(instr, matches, instr_regex)) {
+                    instr_tokens = {matches[1], matches[2], matches[4], matches[3]};
+                }
+                break;
+            case InstrS:
+                instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*\\(\\s*([xX][0-9]+)\\s*\\)\\s*");
+                if (std::regex_match(instr, matches, instr_regex)) {
+                    instr_tokens = {matches[1], matches[2], matches[4], matches[3]};
+                }
+                break;
+            case InstrB:
+                instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*");
+                if (std::regex_match(instr, matches, instr_regex)) {
+                    instr_tokens = {matches[1], matches[2], matches[3], matches[4]};
+                }
+                break;
+            case InstrU:
+                instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*");
+                if (std::regex_match(instr, matches, instr_regex)) {
+                    instr_tokens = {matches[1], matches[2], matches[3]};
+                }
+                break;
+            case InstrJ:
+                instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*");
+                if (std::regex_match(instr, matches, instr_regex)) {
+                    instr_tokens = {matches[1], matches[2], matches[3]};
+                }
+                break;
+        }
+        return instr_tokens;
     }
 
     InstrParams parse_tokens(std::vector<std::string> instr_tokens) {
@@ -50,8 +116,8 @@ class Assembler {
                 instr_params = {name, rd, rs1, rs2, imm};
                 break;
             case InstrS:
-                rs1 = instr_registers[instr_tokens[1]];
-                rs2 = instr_registers[instr_tokens[2]];
+                rs2 = instr_registers[instr_tokens[1]];
+                rs1 = instr_registers[instr_tokens[2]];
                 imm = parse_imm(instr_tokens[3]);
                 instr_params = {name, rd, rs1, rs2, imm};
                 break;
@@ -133,7 +199,7 @@ class Assembler {
         imm_parts.imm_10_5 = imm.substr(31 - (10), (10 - 5) + 1);
         imm_parts.imm_4_1 = imm.substr(31 - (4), (4 - 1) + 1);
         imm_parts.imm_11 = imm.substr(31 - (11), (11 - 11) + 1);
-        imm_parts.imm_31_12 = imm.substr(31 - (31), (31 - 12) + 1);
+        imm_parts.imm_31_12 = imm.substr(31 - (19), (19 - 0) + 1);  // Upper intermediate
         imm_parts.imm_20 = imm.substr(31 - (20), (20 - 20) + 1);
         imm_parts.imm_10_1 = imm.substr(31 - (10), (10 - 1) + 1);
         imm_parts.imm_19_12 = imm.substr(31 - (19), (19 - 12) + 1);
