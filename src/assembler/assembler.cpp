@@ -19,10 +19,11 @@ int main() {
 
     for (auto x : instr) {
         EncodedInstr e = a.encode(x);
-        std::cout << "Assembly: " << x << std::endl;
+        std::cout << "Assembly: " << e.assembly << std::endl;
         std::cout << "Format  : " << e.format << std::endl;
         std::cout << "Binary  : " << e.bin << std::endl;
         std::cout << "Hex     : " << e.hex << std::endl;
+        std::cout << std::endl;
     }
     return 0;
 }

@@ -1,4 +1,5 @@
 #include <bitset>
+// #include <format> // Yaar yath gaseh C++20 aasun
 #include <regex>
 #include <string>
 #include <vector>
@@ -13,11 +14,12 @@ class Assembler {
         if (instr_tokens.size() == 0) {
             throw std::runtime_error("Invalid instruction");
         }
+        std::string instr_assembly = instr_tokens[instr_tokens.size() - 1];
         InstrParams instr_params = parse_tokens(instr_tokens);
         std::string encoded_instr_bin = parse_params(instr_params);
         std::string encoded_instr_hex = "0x" + bin_to_hex(encoded_instr_bin);
         std::string format(1, instr_info[instr_params.name].format);
-        return {encoded_instr_bin, encoded_instr_hex, format};
+        return {instr_assembly, encoded_instr_bin, encoded_instr_hex, format};
     }
 
     std::vector<std::string> parse_instr(std::string instr) {
@@ -27,7 +29,7 @@ class Assembler {
         if (!std::regex_match(instr, matches, name_regex)) {
             return instr_tokens;
         }
-        std::string instr_name = matches[1];
+        std::string instr_name = matches.str(1);
         for_each(instr_name.begin(), instr_name.end(), [](char& c) {
             c = tolower(c);
         });
@@ -49,47 +51,62 @@ class Assembler {
 
     std::vector<std::string> parse_instr_format(std::string instr, InstrFormat format) {
         std::vector<std::string> instr_tokens;
+        std::string instr_assembly;
         std::regex instr_regex;
         std::smatch matches;
         switch (format) {
             case InstrR:
                 instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*([xX][0-9]+)\\s*,\\s*([xX][0-9]+)\\s*");
                 if (std::regex_match(instr, matches, instr_regex)) {
-                    instr_tokens = {matches[1], matches[2], matches[3], matches[4]};
+                    // instr_assembly = std::format("{} {}, {}, {}", matches.str(1), matches.str(2), matches.str(3), matches.str(4));
+                    instr_assembly = matches.str(1) + " " + matches.str(2) + ", " + matches.str(3) + ", " + matches.str(4);
+                    instr_tokens = {matches.str(1), matches.str(2), matches.str(3), matches.str(4), instr_assembly};
                 }
                 break;
             case InstrI:
                 instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*");
                 if (std::regex_match(instr, matches, instr_regex)) {
-                    instr_tokens = {matches[1], matches[2], matches[3], matches[4]};
+                    // instr_assembly = std::format("{} {}, {}, {}", matches.str(1), matches.str(2), matches.str(3), matches.str(4));
+                    instr_assembly = matches.str(1) + " " + matches.str(2) + ", " + matches.str(3) + ", " + matches.str(4);
+                    instr_tokens = {matches.str(1), matches.str(2), matches.str(3), matches.str(4), instr_assembly};
                 }
                 instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*\\(\\s*([xX][0-9]+)\\s*\\)\\s*");
                 if (std::regex_match(instr, matches, instr_regex)) {
-                    instr_tokens = {matches[1], matches[2], matches[4], matches[3]};
+                    // instr_assembly = std::format("{} {}, {}({})", matches.str(1), matches.str(2), matches.str(3), matches.str(4));
+                    instr_assembly = matches.str(1) + " " + matches.str(2) + ", " + matches.str(3) + "(" + matches.str(4) + ")";
+                    instr_tokens = {matches.str(1), matches.str(2), matches.str(4), matches.str(3), instr_assembly};
                 }
                 break;
             case InstrS:
                 instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*\\(\\s*([xX][0-9]+)\\s*\\)\\s*");
                 if (std::regex_match(instr, matches, instr_regex)) {
-                    instr_tokens = {matches[1], matches[2], matches[4], matches[3]};
+                    // instr_assembly = std::format("{} {}, {}({})", matches.str(1), matches.str(2), matches.str(3), matches.str(4));
+                    instr_assembly = matches.str(1) + " " + matches.str(2) + ", " + matches.str(3) + "(" + matches.str(4) + ")";
+                    instr_tokens = {matches.str(1), matches.str(2), matches.str(4), matches.str(3), instr_assembly};
                 }
                 break;
             case InstrB:
                 instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*");
                 if (std::regex_match(instr, matches, instr_regex)) {
-                    instr_tokens = {matches[1], matches[2], matches[3], matches[4]};
+                    // instr_assembly = std::format("{} {}, {}, {}", matches.str(1), matches.str(2), matches.str(3), matches.str(4));
+                    instr_assembly = matches.str(1) + " " + matches.str(2) + ", " + matches.str(3) + ", " + matches.str(4);
+                    instr_tokens = {matches.str(1), matches.str(2), matches.str(3), matches.str(4), instr_assembly};
                 }
                 break;
             case InstrU:
                 instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*");
                 if (std::regex_match(instr, matches, instr_regex)) {
-                    instr_tokens = {matches[1], matches[2], matches[3]};
+                    // instr_assembly = std::format("{} {}, {}", matches.str(1), matches.str(2), matches.str(3));
+                    instr_assembly = matches.str(1) + " " + matches.str(2) + ", " + matches.str(3);
+                    instr_tokens = {matches.str(1), matches.str(2), matches.str(3), instr_assembly};
                 }
                 break;
             case InstrJ:
                 instr_regex = std::regex("\\s*([[:alpha:]]+)\\s+([xX][0-9]+)\\s*,\\s*(-?[0-9]+)\\s*");
                 if (std::regex_match(instr, matches, instr_regex)) {
-                    instr_tokens = {matches[1], matches[2], matches[3]};
+                    // instr_assembly = std::format("{} {}, {}", matches.str(1), matches.str(2), matches.str(3));
+                    instr_assembly = matches.str(1) + " " + matches.str(2) + ", " + matches.str(3);
+                    instr_tokens = {matches.str(1), matches.str(2), matches.str(3), instr_assembly};
                 }
                 break;
         }

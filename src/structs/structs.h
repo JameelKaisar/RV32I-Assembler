@@ -33,6 +33,7 @@ typedef struct ImmParts {
 } ImmParts;
 
 typedef struct EncodedInstr {
+    std::string assembly;
     std::string bin;
     std::string hex;
     std::string format;
