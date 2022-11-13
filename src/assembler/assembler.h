@@ -27,7 +27,7 @@ class Assembler {
         }
         std::string instr_name = matches[1];
         for_each(instr_name.begin(), instr_name.end(), [](char& c) {
-            c = toupper(c);
+            c = tolower(c);
         });
         if (instr_info.find(instr_name) == instr_info.end()) {
             return instr_tokens;
@@ -35,8 +35,8 @@ class Assembler {
         InstrFormat format = instr_info[instr_name].format;
         instr_tokens = parse_instr_format(instr, format);
         for (int i = 0; i < instr_tokens.size(); i++) {
-            for_each(instr_tokens[i].begin(), instr_tokens[i].end(), [i](char& c) {
-                c = (i == 0) ? toupper(c) : tolower(c);
+            for_each(instr_tokens[i].begin(), instr_tokens[i].end(), [](char& c) {
+                c = tolower(c);
             });
             if (i != 0 && instr_tokens[i][0] == 'x' && instr_registers.find(instr_tokens[i]) == instr_registers.end()) {
                 return std::vector<std::string>();
