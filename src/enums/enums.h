@@ -1,6 +1,6 @@
-enum InstrFormat { InstrR,
-                   InstrI,
-                   InstrS,
-                   InstrB,
-                   InstrU,
-                   InstrJ };
+enum InstrFormat { InstrR = 'R',
+                   InstrI = 'I',
+                   InstrS = 'S',
+                   InstrB = 'B',
+                   InstrU = 'U',
+                   InstrJ = 'J' };

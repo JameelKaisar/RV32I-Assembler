@@ -31,3 +31,9 @@ typedef struct ImmParts {
     std::string imm_10_1;
     std::string imm_19_12;
 } ImmParts;
+
+typedef struct EncodedInstr {
+    std::string bin;
+    std::string hex;
+    std::string format;
+} EncodedInstr;

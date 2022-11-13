@@ -18,8 +18,11 @@ int main() {
     instr.push_back("SLTIU x2, x3, 5");                       // 0x0051b113
 
     for (auto x : instr) {
-        std::cout << a.encode_binary(x) << std::endl;
-        std::cout << a.encode_hex(x) << std::endl;
+        EncodedInstr e = a.encode(x);
+        std::cout << "Assembly: " << x << std::endl;
+        std::cout << "Format  : " << e.format << std::endl;
+        std::cout << "Binary  : " << e.bin << std::endl;
+        std::cout << "Hex     : " << e.hex << std::endl;
     }
     return 0;
 }
