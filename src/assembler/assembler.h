@@ -112,37 +112,65 @@ class Assembler {
             case InstrI:
                 rd = instr_registers[instr_tokens[1]];
                 rs1 = instr_registers[instr_tokens[2]];
-                imm = parse_imm(instr_tokens[3]);
+                imm = parse_imm(instr_tokens[3], format);
                 instr_params = {name, rd, rs1, rs2, imm};
                 break;
             case InstrS:
                 rs2 = instr_registers[instr_tokens[1]];
                 rs1 = instr_registers[instr_tokens[2]];
-                imm = parse_imm(instr_tokens[3]);
+                imm = parse_imm(instr_tokens[3], format);
                 instr_params = {name, rd, rs1, rs2, imm};
                 break;
             case InstrB:
                 rs1 = instr_registers[instr_tokens[1]];
                 rs2 = instr_registers[instr_tokens[2]];
-                imm = parse_imm(instr_tokens[3]);
+                imm = parse_imm(instr_tokens[3], format);
                 instr_params = {name, rd, rs1, rs2, imm};
                 break;
             case InstrU:
                 rd = instr_registers[instr_tokens[1]];
-                imm = parse_imm(instr_tokens[2]);
+                imm = parse_imm(instr_tokens[2], format);
                 instr_params = {name, rd, rs1, rs2, imm};
                 break;
             case InstrJ:
                 rd = instr_registers[instr_tokens[1]];
-                imm = parse_imm(instr_tokens[2]);
+                imm = parse_imm(instr_tokens[2], format);
                 instr_params = {name, rd, rs1, rs2, imm};
                 break;
         }
         return instr_params;
     }
 
-    std::string parse_imm(std::string imm) {
-        return std::bitset<32>(std::stoi(imm)).to_string();
+    std::string parse_imm(std::string imm, InstrFormat format) {
+        int imm_int = std::stoi(imm);
+        std::string imm_bin;
+        std::string imm_bin_32;
+        switch (format) {
+            case InstrI:
+                imm_bin = std::bitset<12>(imm_int).to_string();
+                imm_bin_32 = std::string(20, imm_bin[0]) + imm_bin;
+                break;
+            case InstrS:
+                imm_bin = std::bitset<12>(imm_int).to_string();
+                imm_bin_32 = std::string(20, imm_bin[0]) + imm_bin;
+                break;
+            case InstrB:
+                imm_int >>= 1;
+                imm_bin = std::bitset<12>(imm_int).to_string();
+                imm_bin_32 = std::string(19, imm_bin[0]) + imm_bin + "0";
+                break;
+            case InstrU:
+                // NOTE: imm_int chun right shift karun kehe
+                imm_bin = std::bitset<20>(imm_int).to_string();
+                imm_bin_32 = imm_bin + std::string(12, '0');
+                break;
+            case InstrJ:
+                imm_int >>= 1;
+                imm_bin = std::bitset<20>(imm_int).to_string();
+                imm_bin_32 = std::string(11, imm_bin[0]) + imm_bin + "0";
+                break;
+        }
+        return imm_bin_32;
     }
 
     std::string parse_params(InstrParams instr_params) {
@@ -199,7 +227,7 @@ class Assembler {
         imm_parts.imm_10_5 = imm.substr(31 - (10), (10 - 5) + 1);
         imm_parts.imm_4_1 = imm.substr(31 - (4), (4 - 1) + 1);
         imm_parts.imm_11 = imm.substr(31 - (11), (11 - 11) + 1);
-        imm_parts.imm_31_12 = imm.substr(31 - (19), (19 - 0) + 1);  // Upper intermediate
+        imm_parts.imm_31_12 = imm.substr(31 - (31), (31 - 12) + 1);
         imm_parts.imm_20 = imm.substr(31 - (20), (20 - 20) + 1);
         imm_parts.imm_10_1 = imm.substr(31 - (10), (10 - 1) + 1);
         imm_parts.imm_19_12 = imm.substr(31 - (19), (19 - 12) + 1);

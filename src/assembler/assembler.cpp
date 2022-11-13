@@ -13,6 +13,10 @@ int main() {
     instr.push_back("auipc X31, -10");                        // 0xffff6f97
     instr.push_back("JALR X1, X2, 10");                       // 0x00a100e7
     instr.push_back("jal x1, -10");                           // 0xff7ff0ef
+    instr.push_back("BLTU x1, x2, -8");                       // 0xfe20ece3
+    instr.push_back("BGEU x1, x2, 4");                        // 0x0020f263
+    instr.push_back("SLTIU x2, x3, 5");                       // 0x0051b113
+
     for (auto x : instr) {
         std::cout << a.encode_binary(x) << std::endl;
         std::cout << a.encode_hex(x) << std::endl;
